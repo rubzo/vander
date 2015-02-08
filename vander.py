@@ -4,6 +4,13 @@ import urwid, sys, subprocess, re
 
 regex_number = re.compile("[^\d]*(\d+).*")
 
+def get_value(output, n = 0):
+	match = regex_number.match(output)
+	if (match):
+		# TODO: what if n is bad?
+		return int(match.group(n+1))
+	return None
+
 def call(cmd):
 	try:
 		output = subprocess.check_output(cmd)
@@ -12,13 +19,6 @@ def call(cmd):
 		print("Couldn't execute command: " + " ".join(cmd))
 		sys.exit(1)
 
-def get_value(output, n = 0):
-	match = regex_number.match(output)
-	if (match):
-		# TODO: what if n is bad?
-		return int(match.group(n+1))
-	return None
-
 def test(cmd):
 	output = call(cmd)
 	value = get_value(output)
@@ -26,19 +26,36 @@ def test(cmd):
 		print("Couldn't find data in command's output.")
 		sys.exit(1)
 
+def usage():
+	print("vander - live graphing of a command's output")
+	print("vander [-t ...] [-c ...] <command>")
+	print(" -t <n> : wait <n> seconds between each command. eg. 0.5, 3")
+	print(" -c <color> : use <color> for the graph. eg. dark red, white")
+	sys.exit(0)
+
+update_period = 1
+graph_color = "white"
+
 command = []
-for i in xrange(1, len(sys.argv)):
+read_flags = False
+i = 1
+while (i != len(sys.argv)):
+	if (not read_flags) and sys.argv[i] == "-t":
+		update_period = float(sys.argv[i+1])
+		i += 2
+		continue
+	elif (not read_flags) and sys.argv[i] == "-c":
+		graph_color = sys.argv[i+1]
+		i += 2
+		continue
+	elif (not read_flags) and sys.argv[i] == "-h":
+		usage()
+	elif (not read_flags):
+		read_flags = True
 	command.append(sys.argv[i])
+	i += 1
 
 test(command)
-
-# TODO: read from screen width
-max_data_points = 40
-update_period = 0.5
-
-data_points = []
-for i in xrange(0, max_data_points):
-	data_points.append((0, ))
 
 def add_data_point(data_points, data_point):
 	data_points.pop(0)
@@ -51,16 +68,10 @@ def get_data_ceiling(data_points):
 			maximum = i
 	return maximum
 
-def get_average(data_points):
-	total = 0
-	for (i, ) in data_points:
-		total += i
-	return (float(total) / len(data_points))
-
 palette = [
     ('titlebar', 'white', 'black'),
-    ('graph_bg', 'white', 'black'),
-    ('graph_top', 'white', 'white'),
+    ('background', 'white', 'black'),
+    ('graph_top', graph_color, graph_color),
     ('graph_fill', 'white', 'black')]
 
 title_text = "Q quits. Graphing command: '" + " ".join(command) + "'"
@@ -69,18 +80,25 @@ header_text = urwid.Text(title_text)
 header = urwid.AttrMap(header_text, 'titlebar')
 
 # TODO: Y axis values
-graph_attrs = [('graph_bg', " "), ('graph_top', "#"), ('graph_fill', "&")]
+graph_attrs = [('background', " "), ('graph_top', "#"), ('graph_fill', "&")]
 graph = urwid.BarGraph(graph_attrs)
+
 layout = urwid.Frame(header=header, body=graph)
+
+# TODO: read from screen width
+max_data_points = 40
+
+data_points = []
+for i in xrange(0, max_data_points):
+	data_points.append((0, ))
 
 def update_graph():
 	global graph, command, data_points, header_text, title_text
 	data_point = get_value(call(command))
 	add_data_point(data_points, data_point)
 	maximum = get_data_ceiling(data_points)
-	average = get_average(data_points)
 	graph.set_data(data_points, maximum)
-	header_text.set_text("(L: %d M: %d RA: %.3f) -- " % (data_point, maximum, average) + title_text)
+	header_text.set_text("(L: %d M: %d) -- " % (data_point, maximum) + title_text)
 
 def handle_input(key):
     if key == 'Q' or key == 'q':
