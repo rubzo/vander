@@ -36,6 +36,7 @@ def usage():
 update_period = 1
 graph_color = "white"
 
+# Build the command, and possibly read some flags.
 command = []
 read_flags = False
 i = 1
@@ -55,6 +56,7 @@ while (i != len(sys.argv)):
 	command.append(sys.argv[i])
 	i += 1
 
+# Make sure the command actually returns an integer value somewhere.
 test(command)
 
 def add_data_point(data_points, data_point):
@@ -69,26 +71,28 @@ def get_data_ceiling(data_points):
 	return maximum
 
 palette = [
-    ('titlebar', 'white', 'black'),
-    ('background', 'white', 'black'),
-    ('graph_top', graph_color, graph_color),
-    ('graph_fill', 'white', 'black')]
+    ("titlebar", "white", "black"),
+    ("background", "white", "black"),
+    ("graph_top", graph_color, graph_color),
+    ("graph_fill", "white", "black")]
 
 title_text = "Q quits. Graphing command: '" + " ".join(command) + "'"
 
 header_text = urwid.Text(title_text)
-header = urwid.AttrMap(header_text, 'titlebar')
+header = urwid.AttrMap(header_text, "titlebar")
 
 # TODO: Y axis values
-graph_attrs = [('background', " "), ('graph_top', "#"), ('graph_fill', "&")]
+graph_attrs = [("background", " "), ("graph_top", "#"), ("graph_fill", "&")]
 graph = urwid.BarGraph(graph_attrs)
 
 layout = urwid.Frame(header=header, body=graph)
 
-# TODO: read from screen width
+# TODO: read from screen width somehow
 max_data_points = 40
 
 data_points = []
+# Put in fake data points at the start, so the graphing comes
+# in from the right...
 for i in xrange(0, max_data_points):
 	data_points.append((0, ))
 
