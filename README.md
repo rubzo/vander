@@ -11,7 +11,6 @@ How often the command should run can be either an integer or a float, e.g., 3 an
 ## Examples
 
 * `vander.py cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`
-* `vander.py -t 0.5 
 * `vander.py python -c "import random; print random.randint(0, 100)"`
 
 ## Todo
