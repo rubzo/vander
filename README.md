@@ -15,5 +15,4 @@ How often the command should run can be either an integer or a float, e.g., 3 an
 
 ## Todo
 
-* Y-axis data labels
-* Adjustments for current terminal size.
+* Nothing?
