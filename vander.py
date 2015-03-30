@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urwid, sys, subprocess, re
+import urwid, sys, subprocess, re, signal
 
 import os
 SCREEN_rows, SCREEN_columns = os.popen('stty size', 'r').read().split()
@@ -36,7 +36,6 @@ def usage():
     print("vander [-t ...] [-c ...] <command>")
     print(" -t <n> : wait <n> seconds between each command. eg. 0.5, 3")
     print(" -c <color> : use <color> for the graph. eg. dark red, white")
-    sys.exit(0)
 
 update_period = 1
 graph_color = "white"
@@ -56,10 +55,16 @@ while (i != len(sys.argv)):
         continue
     elif (not read_flags) and sys.argv[i] == "-h":
         usage()
+        sys.exit(0)
     elif (not read_flags):
         read_flags = True
     command.append(sys.argv[i])
     i += 1
+
+if (command == []):
+    print("ERROR: No command specified.")
+    usage()
+    sys.exit(1)
 
 # Make sure the command actually returns an integer value somewhere.
 test(command)
@@ -163,6 +168,11 @@ def update_graph():
 def handle_input(key):
     if key == 'Q' or key == 'q':
         raise urwid.ExitMainLoop()
+
+def quit_after_sigint(_, __):
+    raise urwid.ExitMainLoop()
+
+signal.signal(signal.SIGINT, quit_after_sigint)
 
 def periodic(main_loop, user_data):
     global update_period
