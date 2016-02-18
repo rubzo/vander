@@ -790,6 +790,8 @@ def scale_bar_values( bar, top, maxrow ):
     """
     Return a list of bar values aliased to integer values of maxrow.
     """
+    if top < 1:
+        top = 1
     return [maxrow - int(float(v) * maxrow / top + 0.5) for v in bar]
 
 
