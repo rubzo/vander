@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "urwid", specifier = ">=4.0.0" }]
+requires-dist = [{ name = "urwid", specifier = "==4.0.0" }]
 
 [[package]]
 name = "wcwidth"
