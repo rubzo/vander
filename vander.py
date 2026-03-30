@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
-import urwid, sys, subprocess, re, signal
-
 import os
+import re
+import signal
+import subprocess
+import sys
+
+import urwid
+
 SCREEN_rows, SCREEN_columns = os.popen('stty size', 'r').read().split()
 SCREEN_rows = int(SCREEN_rows)
 SCREEN_columns = int(SCREEN_columns)
 
-regex_number = re.compile("[^\d]*(\d+).*")
+regex_number = re.compile(b"[^\d]*(\d+).*")
 
 def get_value(output, n = 0):
     match = regex_number.match(output)
@@ -117,7 +122,7 @@ max_data_points = SCREEN_columns - y_axis_size - 2
 data_points = []
 # Put in fake data points at the start, so the graphing comes
 # in from the right...
-for i in xrange(0, max_data_points):
+for i in range(0, max_data_points):
     data_points.append((0, ))
 
 def update_y_axis(maximum, data_points):
